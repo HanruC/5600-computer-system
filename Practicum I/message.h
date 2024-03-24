@@ -19,13 +19,9 @@ typedef struct {
     bool delivered;
 } Message;
 
-
-Message* create_msg(int id, const char* time_sent, const char* sender, const char* receiver, const char* content);
-
+Message* create_msg(int id, const char* sender, const char* receiver, const char* content);
 void store_msg(Message* msg);
-
 Message* retrieve_msg(int id);
-
 void free_msg(Message* msg);
 
 #endif
