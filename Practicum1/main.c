@@ -1,63 +1,56 @@
+// main.c
 #include "message.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
+#define NUM_MESSAGES 1000
+#define NUM_ACCESSES 1000
+
+void generate_messages();
+void test_algorithm(int algorithm);
+
 int main() {
-    // Create and store messages
-    for (int i = 1; i <= 20; i++) {
-        char time_sent[20];
-        sprintf(time_sent, "2023-06-09 %02d:00:00", i);
-        char sender[50];
-        sprintf(sender, "User%d", i);
-        char receiver[50];
-        sprintf(receiver, "User%d", i + 1);
-        char content[100];
-        sprintf(content, "Message from User%d to User%d", i, i + 1);
-        Message* msg = create_msg(i, time_sent, sender, receiver, content, false);
-        store_msg(msg);
-        free_msg(msg);
-    }
+    init_cache();
 
-    // Test retrieving a message that is already in the cache
-    clock_t start = clock();
-    Message* cached_msg = retrieve_msg(10);
-    clock_t end = clock();
-    double cached_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("Retrieving a cached message took %f seconds.\n", cached_time);
-    free_msg(cached_msg);
+    generate_messages();
 
-    // Test retrieving a message that is not in the cache
-    start = clock();
-    Message* non_cached_msg = retrieve_msg(25);
-    end = clock();
-    double non_cached_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("Retrieving a non-cached message took %f seconds.\n", non_cached_time);
-    free_msg(non_cached_msg);
+    printf("Testing Random Replacement Algorithm:\n");
+    test_algorithm(0);
 
-    // Test cache replacement policy
-    for (int i = 21; i <= 30; i++) {
-        char time_sent[20];
-        sprintf(time_sent, "2023-06-09 %02d:00:00", i);
-        char sender[50];
-        sprintf(sender, "User%d", i);
-        char receiver[50];
-        sprintf(receiver, "User%d", i + 1);
-        char content[100];
-        sprintf(content, "Message from User%d to User%d", i, i + 1);
-        Message* msg = create_msg(i, time_sent, sender, receiver, content, false);
-        store_msg(msg);
-        free_msg(msg);
-    }
+    init_cache();
 
-    // Retrieve messages in a specific order to verify the cache replacement policy
-    int retrieval_order[] = {30, 29, 28, 27, 26, 25, 24, 23, 22, 21};
-    for (int i = 0; i < 10; i++) {
-        Message* msg = retrieve_msg(retrieval_order[i]);
-        if (msg != NULL) {
-            printf("Retrieved message with ID %d\n", msg->id);
-            free_msg(msg);
-        }
-    }
+    printf("Testing LRU Replacement Algorithm:\n");
+    test_algorithm(1);
 
     return 0;
+}
+
+void generate_messages() {
+    char content[MESSAGE_SIZE - sizeof(int) - 20 - 50 - 50 - sizeof(bool)] = "Test message content";
+    for (int i = 0; i < NUM_MESSAGES; i++) {
+        char time_sent[20];
+        sprintf(time_sent, "%d", i);
+        Message* msg = create_msg(i, time_sent, "sender", "receiver", content, false);
+        store_msg(msg, -1); // -1 indicates no replacement algorithm needed
+        free_msg(msg);
+    }
+}
+
+void test_algorithm(int algorithm) {
+    srand(time(NULL));
+    int cache_hits = 0;
+    int cache_misses = 0;
+    for (int i = 0; i < NUM_ACCESSES; i++) {
+        int msg_id = rand() % NUM_MESSAGES;
+        Message* msg = retrieve_msg(msg_id);
+        if (msg != NULL) {
+            cache_hits++;
+        } else {
+            cache_misses++;
+        }
+    }
+    printf("Cache Hits: %d\n", cache_hits);
+    printf("Cache Misses: %d\n", cache_misses);
+    printf("Cache Hit Ratio: %.2f%%\n", (float)cache_hits / NUM_ACCESSES * 100);
 }
