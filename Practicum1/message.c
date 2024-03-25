@@ -1,4 +1,3 @@
-// message.c
 #include "message.h"
 #include <stdlib.h>
 #include <string.h>
@@ -94,14 +93,17 @@ Message* cache_retrieve(int id) {
                 cache.messages[j] = cache.messages[(j + 1) % CACHE_SIZE];
             }
             cache.messages[cache.rear] = temp;
-            return &cache.messages[cache.rear];
+
+            // Create a dynamically allocated copy of the message
+            Message* msg_copy = (Message*)malloc(sizeof(Message));
+            *msg_copy = cache.messages[cache.rear];
+            return msg_copy;
         }
     }
     return NULL;
 }
 
 void random_replacement(Message* msg) {
-    srand(time(NULL));
     int index = rand() % CACHE_SIZE;
     cache.messages[index] = *msg;
 }
