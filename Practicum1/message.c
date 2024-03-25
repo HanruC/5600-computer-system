@@ -1,115 +1,129 @@
-#include "message.h"
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <time.h>
+#include "message.h"
 
-Cache cache;
+void init_cache(MessageCache* cache) {
+    cache->front = -1;
+    cache->rear = -1;
+    cache->count = 0;
+}
 
-Message* create_msg(int id, const char* time_sent, const char* sender, const char* receiver, const char* content, bool delivered) {
-    Message* msg = (Message*)malloc(sizeof(Message));
-    msg->id = id;
+bool is_cache_full(MessageCache* cache) {
+    return cache->count == CACHE_SIZE;
+}
+
+bool is_cache_empty(MessageCache* cache) {
+    return cache->count == 0;
+}
+
+void enqueue_message(MessageCache* cache, const Message* msg) {
+    if (is_cache_full(cache)) {
+        // Replace an existing message using a replacement algorithm
+        replace_message_lru(cache, msg);
+    } else {
+        cache->rear = (cache->rear + 1) % CACHE_SIZE;
+        cache->messages[cache->rear] = *msg;
+        cache->count++;
+
+        if (cache->front == -1) {
+            cache->front = cache->rear;
+        }
+    }
+}
+
+void dequeue_message(MessageCache* cache, Message* msg) {
+    if (is_cache_empty(cache)) {
+        printf("Cache is empty. Cannot dequeue message.\n");
+        return;
+    }
+
+    *msg = cache->messages[cache->front];
+    cache->front = (cache->front + 1) % CACHE_SIZE;
+    cache->count--;
+
+    if (cache->count == 0) {
+        cache->front = -1;
+        cache->rear = -1;
+    }
+}
+
+bool find_message_in_cache(MessageCache* cache, const char* id, Message* msg) {
+    for (int i = 0; i < cache->count; i++) {
+        int index = (cache->front + i) % CACHE_SIZE;
+        if (strcmp(cache->messages[index].id, id) == 0) {
+            *msg = cache->messages[index];
+            return true;
+        }
+    }
+    return false;
+}
+
+void replace_message_random(MessageCache* cache, const Message* msg) {
+    srand(time(NULL));
+    int index = rand() % cache->count;
+    cache->messages[(cache->front + index) % CACHE_SIZE] = *msg;
+}
+
+void replace_message_lru(MessageCache* cache, const Message* msg) {
+    dequeue_message(cache, &(cache->messages[cache->front]));
+    enqueue_message(cache, msg);
+}
+
+void create_msg(Message* msg, const char* id, const char* time_sent, const char* sender,
+                const char* receiver, const char* content, bool delivered) {
+    strncpy(msg->id, id, sizeof(msg->id));
     strncpy(msg->time_sent, time_sent, sizeof(msg->time_sent));
     strncpy(msg->sender, sender, sizeof(msg->sender));
     strncpy(msg->receiver, receiver, sizeof(msg->receiver));
     strncpy(msg->content, content, sizeof(msg->content));
     msg->delivered = delivered;
-    return msg;
 }
 
-void store_msg(Message* msg, int algorithm) {
-    char filename[256];
-    sprintf(filename, "msg_%d.txt", msg->id);
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) {
-        printf("Error: Unable to store message %d\n", msg->id);
-        return;
-    }
-    fwrite(msg, sizeof(Message), 1, file);
-    fclose(file);
-
-    if (algorithm != -1) {
-        cache_insert(msg, algorithm);
-    }
-}
-
-Message* retrieve_msg(int id) {
-    Message* msg = cache_retrieve(id);
-    if (msg != NULL) {
-        return msg;
+void store_msg(const Message* msg, MessageCache* cache) {
+    FILE* fp = fopen("message_store.txt", "a");
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
     }
 
-    char filename[256];
-    sprintf(filename, "msg_%d.txt", id);
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) {
-        printf("Error: Message %d not found\n", id);
-        return NULL;
+    fprintf(fp, "%s,%s,%s,%s,%s,%d\n", msg->id, msg->time_sent, msg->sender,
+            msg->receiver, msg->content, msg->delivered);
+    fclose(fp);
+
+    enqueue_message(cache, msg);
+}
+
+bool retrieve_msg(const char* id, Message* msg, MessageCache* cache) {
+    if (find_message_in_cache(cache, id, msg)) {
+        return true;
     }
-    msg = (Message*)malloc(sizeof(Message));
-    fread(msg, sizeof(Message), 1, file);
-    fclose(file);
 
-    cache_insert(msg, 1); // Use LRU replacement algorithm when inserting into cache
-
-    return msg;
-}
-
-void free_msg(Message* msg) {
-    free(msg);
-}
-
-void init_cache() {
-    cache.front = 0;
-    cache.rear = -1;
-    cache.count = 0;
-}
-
-bool cache_full() {
-    return cache.count == CACHE_SIZE;
-}
-
-void cache_insert(Message* msg, int algorithm) {
-    if (cache_full()) {
-        if (algorithm == 0) {
-            random_replacement(msg);
-        } else if (algorithm == 1) {
-            lru_replacement(msg);
-        }
-    } else {
-        cache.rear = (cache.rear + 1) % CACHE_SIZE;
-        cache.messages[cache.rear] = *msg;
-        cache.count++;
+    FILE* fp = fopen("message_store.txt", "r");
+    if (fp == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
     }
-}
 
-Message* cache_retrieve(int id) {
-    for (int i = 0; i < cache.count; i++) {
-        int index = (cache.front + i) % CACHE_SIZE;
-        if (cache.messages[index].id == id) {
-            // Move the accessed message to the rear (most recently used)
-            Message temp = cache.messages[index];
-            for (int j = index; j != cache.rear; j = (j + 1) % CACHE_SIZE) {
-                cache.messages[j] = cache.messages[(j + 1) % CACHE_SIZE];
-            }
-            cache.messages[cache.rear] = temp;
+    char line[MSG_SIZE];
+    while (fgets(line, sizeof(line), fp)) {
+        char* token = strtok(line, ",");
+        if (strcmp(token, id) == 0) {
+            strncpy(msg->id, token, sizeof(msg->id));
+            strncpy(msg->time_sent, strtok(NULL, ","), sizeof(msg->time_sent));
+            strncpy(msg->sender, strtok(NULL, ","), sizeof(msg->sender));
+            strncpy(msg->receiver, strtok(NULL, ","), sizeof(msg->receiver));
+            strncpy(msg->content, strtok(NULL, ","), sizeof(msg->content));
+            msg->delivered = atoi(strtok(NULL, ","));
+            fclose(fp);
 
-            // Create a dynamically allocated copy of the message
-            Message* msg_copy = (Message*)malloc(sizeof(Message));
-            *msg_copy = cache.messages[cache.rear];
-            return msg_copy;
+            enqueue_message(cache, msg);
+            return true;
         }
     }
-    return NULL;
-}
 
-void random_replacement(Message* msg) {
-    int index = rand() % CACHE_SIZE;
-    cache.messages[index] = *msg;
-}
-
-void lru_replacement(Message* msg) {
-    cache.messages[cache.front] = *msg;
-    cache.front = (cache.front + 1) % CACHE_SIZE;
-    cache.rear = (cache.front + cache.count - 1) % CACHE_SIZE;
+    fclose(fp);
+    return false;
 }
