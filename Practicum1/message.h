@@ -1,39 +1,50 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include <stdbool.h>
+#include <time.h>
 
-#define MSG_SIZE 1024
-#define CACHE_SIZE 16
+#define MESSAGE_SIZE 1024
+#define CACHE_SIZE 128 // 64, 16, 32 
+
+// In message.h or cache_policy.h
+#ifndef CACHE_POLICY_H
+#define CACHE_POLICY_H
+
+#define REPLACEMENT_POLICY_RANDOM 1
+#define REPLACEMENT_POLICY_LRU 2
+
+#endif // CACHE_POLICY_H
+
 
 typedef struct {
-    char id[20];
-    char time_sent[20];
-    char sender[50];
-    char receiver[50];
-    char content[MSG_SIZE - 140];
-    bool delivered;
-} Message;
+    int valid;
+    char data[MESSAGE_SIZE];
+    int message_id;
+    int access_time; // For LRU: Lower means older
+} CacheEntry;
 
 typedef struct {
-    Message messages[CACHE_SIZE];
-    int front;
-    int rear;
-    int count;
+    CacheEntry entries[CACHE_SIZE];
+    int replacement_policy;
+    int time_counter; // Incremented with each cache access
 } MessageCache;
 
-void init_cache(MessageCache* cache);
-bool is_cache_full(MessageCache* cache);
-bool is_cache_empty(MessageCache* cache);
-void enqueue_message(MessageCache* cache, const Message* msg);
-void dequeue_message(MessageCache* cache, Message* msg);
-bool find_message_in_cache(MessageCache* cache, const char* id, Message* msg);
-void replace_message_random(MessageCache* cache, const Message* msg);
-void replace_message_lru(MessageCache* cache, const Message* msg);
 
-void create_msg(Message* msg, const char* id, const char* time_sent, const char* sender,
-                const char* receiver, const char* content, bool delivered);
-void store_msg(const Message* msg, MessageCache* cache);
-bool retrieve_msg(const char* id, Message* msg, MessageCache* cache);
+typedef struct {
+    int unique_id;
+    time_t time_sent;
+    char sender[256]; // Assuming a fixed size for simplicity
+    char receiver[256];
+    char content[512]; // Adjust sizes as needed
+    int delivered_flag;
+} Message;
 
-#endif
+// Function prototypes for message and cache management
+Message* create_msg(int unique_id, time_t time_sent, const char* sender, const char* receiver, const char* content, int delivered_flag);
+void free_message(Message* msg);
+int store_msg(Message* msg);
+void init_cache(MessageCache* cache, int policy);
+int store_message_in_cache(MessageCache* cache, Message* msg);
+Message* retrieve_message_from_cache(MessageCache* cache, int message_id);
+
+#endif // MESSAGE_H
