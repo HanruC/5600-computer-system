@@ -1,0 +1,33 @@
+# Multiprocessing and Polybius Cipher Project
+
+This project includes two main components: a multiprocessing application that processes words from a file using the Polybius cipher in a concurrent manner, and the Polybius cipher itself which encrypts text based on the Polybius square technique.
+
+
+### Building the Project
+
+Ensure you have GCC and Make installed on your system. Then, follow these steps to compile the project:
+
+Open a terminal in the project directory.
+Execute the make command to build the project: 
+```bash 
+make
+```
+This command utilizes the provided Makefile to compile the source code, generating two executable files: multiprocessing and polybius.
+
+### How to do exactly 
+To run the multiprocessing program and generate encrypted text files:
+Generate Words and Encrypt: Use the multiprocessing executable with the desired number of words (minimum 10000) and an output file name of your choice. The command format is as follows:
+```bash 
+./multiprocessing <numberOfWords> <outputFileName>
+``` 
+<numberOfWords>: Specify the number of random words to generate. This number must be at least 10000.
+<outputFileName>: Name the output file where the generated words will be stored.
+Example:
+```bash
+./multiprocessing 10000 generated_words.txt
+```
+This command generates a file named generated_words.txt with 10000 random words.
+After running the tests or demonstrations, you can clean up the generated executables and output files using the make clean command, which removes the multiprocessing and polybius executables:
+```bash
+make clean
+```
