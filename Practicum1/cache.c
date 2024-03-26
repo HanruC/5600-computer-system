@@ -1,4 +1,4 @@
-#include <stdlib.h> // Include this line at the top of cache.c
+#include <stdlib.h> 
 #include "message.h"
 #include <string.h>
 
@@ -10,6 +10,11 @@
 // Choose the replacement policy here
 #define REPLACEMENT_POLICY REPLACEMENT_POLICY_LRU
 
+/**
+ * @brief Initializes the message cache with the specified replacement policy.
+ * @param cache A pointer to the message cache to be initialized.
+ * @param policy The replacement policy to be used by the cache.
+ */
 void init_cache(MessageCache* cache, int policy) {
     for (int i = 0; i < CACHE_SIZE; i++) {
         cache->entries[i].valid = 0;
@@ -18,6 +23,11 @@ void init_cache(MessageCache* cache, int policy) {
     cache->time_counter = 0; // Initialize time counter for LRU
 }
 
+/**
+ * @brief Finds the index of the least recently used (LRU) entry in the cache.
+ * @param cache A pointer to the message cache.
+ * @return The index of the LRU entry.
+ */
 int find_replacement_index_LRU(MessageCache* cache) {
     int lru_index = 0;
     for (int i = 1; i < CACHE_SIZE; i++) {
@@ -28,10 +38,20 @@ int find_replacement_index_LRU(MessageCache* cache) {
     return lru_index;
 }
 
+/**
+ * @brief Finds a random index for replacing an entry in the cache.
+ * @return The randomly selected index.
+ */
 int find_replacement_index_random() {
     return rand() % CACHE_SIZE;
 }
 
+/**
+ * @brief Stores a message in the cache.
+ * @param cache A pointer to the message cache.
+ * @param msg A pointer to the message to be stored.
+ * @return 0 on success, -1 on failure.
+ */
 int store_message_in_cache(MessageCache* cache, Message* msg) {
     int index = -1;
     for (int i = 0; i < CACHE_SIZE; i++) {
@@ -57,6 +77,12 @@ int store_message_in_cache(MessageCache* cache, Message* msg) {
     return 0; // Success
 }
 
+/**
+ * @brief Retrieves a message from the cache based on its unique identifier.
+ * @param cache A pointer to the message cache.
+ * @param message_id The unique identifier of the message to be retrieved.
+ * @return A pointer to the retrieved message, or NULL if the message is not found.
+ */
 Message* retrieve_message_from_cache(MessageCache* cache, int message_id) {
     for (int i = 0; i < CACHE_SIZE; i++) {
         if (cache->entries[i].valid && cache->entries[i].message_id == message_id) {

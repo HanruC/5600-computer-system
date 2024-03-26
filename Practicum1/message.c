@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * @brief Creates a new message.
+ * @param unique_id The unique identifier of the message.
+ * @param time_sent The timestamp when the message was sent.
+ * @param sender The sender of the message.
+ * @param receiver The receiver of the message.
+ * @param content The content of the message.
+ * @param delivered_flag Flag indicating if the message has been delivered.
+ * @return A pointer to the newly created message, or NULL if memory allocation fails.
+ */
 Message* create_msg(int unique_id, time_t time_sent, const char* sender, const char* receiver, const char* content, int delivered_flag) {
     Message* msg = (Message*)malloc(sizeof(Message));
     if (!msg) return NULL;
@@ -17,6 +27,10 @@ Message* create_msg(int unique_id, time_t time_sent, const char* sender, const c
     return msg;
 }
 
+/**
+ * @brief Frees the memory allocated for a message.
+ * @param msg A pointer to the message to be freed.
+ */
 void free_message(Message* msg) {
     if (msg) {
         free(msg);

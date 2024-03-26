@@ -2,6 +2,11 @@
 #include "message.h"
 #include <stdio.h>
 
+/**
+ * @brief Stores a message in a text file.
+ * @param msg A pointer to the message to be stored.
+ * @return 0 on success, -1 on failure.
+ */
 int store_msg(Message* msg) {
     FILE* file = fopen("messages.txt", "a");
     if (!file) return -1;

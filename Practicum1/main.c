@@ -9,6 +9,10 @@
 void init_cache(MessageCache* cache, int policy);
 void simulate_accesses(MessageCache* cache, int num_accesses, int replacementPolicy);
 
+/**
+ * @brief Main function for running the message caching simulations.
+ * @return 0 on successful execution.
+ */
 int main() {
     // Seed the random number generator
     srand((unsigned int)time(NULL));
@@ -22,6 +26,12 @@ int main() {
     return 0;
 }
 
+/**
+ * @brief Simulates message retrieval and evaluates cache performance.
+ * @param cache A pointer to the message cache.
+ * @param num_accesses The number of message accesses to simulate.
+ * @param replacementPolicy The replacement policy used by the cache.
+ */
 void simulate_accesses(MessageCache* cache, int num_accesses, int replacementPolicy) {
     // Initialize the cache with the given policy
     init_cache(cache, replacementPolicy);
