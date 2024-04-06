@@ -12,7 +12,7 @@
  * @brief The size of each message in bytes.
  */
 #define MESSAGE_SIZE 1024
-#define CACHE_SIZE 128 // 64, 16, 32 Cache size tested with different values
+#define CACHE_SIZE 64 // 64, 16, 32 Cache size tested with different values
 
 #ifndef CACHE_POLICY_H
 #define CACHE_POLICY_H
