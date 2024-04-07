@@ -52,6 +52,7 @@ void handle_client(int client_sock) {
         int bytes_received;
         while ((bytes_received = recv(client_sock, file_buffer, sizeof(file_buffer), 0)) > 0) {
             fwrite(file_buffer, 1, bytes_received, file);
+            fflush(file); // Flush the buffer to disk after each write
         }
 
         fclose(file);

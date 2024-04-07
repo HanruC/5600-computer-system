@@ -1,1 +1,16 @@
-hello world
+Question 1 (20 Points)
+Using the code from the above tutorial, expand the code to allow you to send a command from a client to the server for writing a file from the client's file system to the server. The request needs include some kind of command (e.g., WRITE) and a path to a local file name (e.g., folder/foo.txt) and the path and name of the file on the server. The design of the command protocol is up to you.
+
+Your client program must allow command line arguments to write the file, e.g., 
+
+% rfs WRITE data/localfoo.txt folder/foo.txt 
+This program should connect to the server, send the "WRITE" command and the file data, and then save that data in a file under the name of the second argument in the correct folder under some "root" folder on the server. So, the use of rfs is:
+
+% rfs WRITE local-file-path remote-file-path 
+You need to figure out how to get data from the client to the server. Assume that the client and server run on different systems. That means that you cannot use the file system to send the file as the client and server would be running on different computer systems in practice. 
+
+If the remote file or path is omitted, use the values for the first argument.
+
+Be sure to create tests that have the client and server on different physical (or virtual) machines. You may use physical computers, local virtual machines, or virtual machines in the cloud.
+
+The server keeps running continuously until its process is killed. The rfs client connects, does its (one) command, closes the socket, and exits, but the server keeps running.
