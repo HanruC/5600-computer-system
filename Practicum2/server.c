@@ -78,7 +78,7 @@ void handle_client(int client_sock) {
         }
         
         fclose(file);
-        send(client_sock, "File sent successfully", strlen("File sent successfully"), 0);
+        // send(client_sock, "File sent successfully", strlen("File sent successfully"), 0);
     } else {
         send(client_sock, "Invalid command", strlen("Invalid command"), 0);
     }
