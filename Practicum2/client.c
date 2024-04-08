@@ -108,10 +108,15 @@ int main(int argc, char *argv[]) {
         int bytes_received;
         while ((bytes_received = recv(socket_desc, file_buffer, sizeof(file_buffer), 0)) > 0) {
             fwrite(file_buffer, 1, bytes_received, file);
+            fflush(file);
         }
 
         fclose(file);
         printf("File received and saved: %s\n", local_file_path);
+        // Receive confirmation message from the server
+        memset(client_message, '\0', sizeof(client_message));
+        recv(socket_desc, client_message, sizeof(client_message), 0);
+        printf("Server response: %s\n", client_message);
     }
 
     // Confirmation message from the server
