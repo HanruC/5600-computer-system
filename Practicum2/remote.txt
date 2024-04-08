@@ -1,4 +1,2 @@
-remote test3
-local to remote test
-remote test3
-File sent successfully
+localtest1
+remotetest1

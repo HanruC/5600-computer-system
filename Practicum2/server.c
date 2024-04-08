@@ -48,7 +48,7 @@ void handle_client(int client_sock) {
                 send(client_sock, "Failed to write to file", strlen("Failed to write to file"), 0);
                 break;
             }
-            fflush(file);  // Flush the data to disk immediately
+            fflush(file);
         }
 
         fclose(file);
@@ -76,9 +76,9 @@ void handle_client(int client_sock) {
         while ((bytes_read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
             send(client_sock, buffer, bytes_read, 0);
         }
-
+        
         fclose(file);
-        send(client_sock, "File sent successfully", strlen("File sent successfully"), 0);
+        // send(client_sock, "File sent successfully", strlen("File sent successfully"), 0);
     } else {
         send(client_sock, "Invalid command", strlen("Invalid command"), 0);
     }
