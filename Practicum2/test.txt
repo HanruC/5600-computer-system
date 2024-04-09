@@ -1,0 +1,7 @@
+% rfs WRITE local.txt remote-file.txt
+% rfs WRITE local2.txt remote-file.txt
+% rfs WRITE local3.txt remote-file.txt
+% rfs RM remote-file.txt
+
+gcc s.c -o s -pthread
+gcc c.c -o c -pthread
