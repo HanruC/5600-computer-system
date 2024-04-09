@@ -5,3 +5,5 @@
 
 gcc s.c -o s -pthread
 gcc c.c -o c -pthread
+
+% rfs WRITE local.txt remote-file2.txt 0444
