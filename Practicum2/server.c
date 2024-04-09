@@ -13,7 +13,6 @@ void handle_client(int client_sock) {
     char client_message[MAX_BUFFER_SIZE];
     memset(client_message, 0, sizeof(client_message));
 
-    // Receive client's message
     if (recv(client_sock, client_message, sizeof(client_message), 0) < 0) {
         perror("Couldn't receive");
         close(client_sock);
@@ -43,25 +42,17 @@ void handle_client(int client_sock) {
         char buffer[MAX_BUFFER_SIZE];
         int bytes_received;
         while ((bytes_received = recv(client_sock, buffer, sizeof(buffer), 0)) > 0) {
-            if (fwrite(buffer, 1, bytes_received, file) != bytes_received) {
-                perror("Failed to write to file");
-                send(client_sock, "Failed to write to file", strlen("Failed to write to file"), 0);
-                break;
-            }
+            fwrite(buffer, 1, bytes_received, file);
             fflush(file);
         }
 
         fclose(file);
-        if (bytes_received >= 0) {
-            chmod(remote_file_path, permission);
-            send(client_sock, "File written successfully", strlen("File written successfully"), 0);
-        } else {
-            send(client_sock, "Failed to write file", strlen("Failed to write file"), 0);
-        }
+        chmod(remote_file_path, permission);
+        send(client_sock, "File written successfully", strlen("File written successfully"), 0);
     } else if (strcmp(command, "GET") == 0) {
-        char remote_file_path[256], local_file_path[256];
+        char remote_file_path[256];
         int append_flag = 0;
-        sscanf(client_message, "%*s %s %s %d", remote_file_path, local_file_path, &append_flag);
+        sscanf(client_message, "%*s %s %d", remote_file_path, &append_flag);
 
         FILE *file = fopen(remote_file_path, "rb");
         if (!file) {
@@ -76,9 +67,8 @@ void handle_client(int client_sock) {
         while ((bytes_read = fread(buffer, 1, sizeof(buffer), file)) > 0) {
             send(client_sock, buffer, bytes_read, 0);
         }
-        
+
         fclose(file);
-        // send(client_sock, "File sent successfully", strlen("File sent successfully"), 0);
     } else {
         send(client_sock, "Invalid command", strlen("Invalid command"), 0);
     }
