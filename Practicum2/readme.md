@@ -48,6 +48,7 @@ The client supports the following commands:
 - `% rfs GET <remote_file_path> <local_file_path>`: Retrieve a file from the remote server and save it locally.
 - `% rfs RM <remote_file_path>`: Remove a file from the remote server.
 - `% rfs LS <remote_file_path>`: Check the permission of a file on the remote server.
+- `% rfs STOP`: STOP server.
 
 The `[permission]` argument in the `WRITE` command is optional and specifies the file permission value for the remote file. If not provided, the default permission `0644` (rw-r--r--) will be used.
 

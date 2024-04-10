@@ -25,6 +25,7 @@ void write_file(int socket_desc, const char *local_file_path, const char *remote
 void get_file(int socket_desc, const char *remote_file_path, const char *local_file_path);
 void remove_file(int socket_desc, const char *remote_file_path);
 void check_permission(int socket_desc, const char *remote_file_path);
+void stop_server(int socket_desc);
 
 /*
  * Function: main
@@ -172,6 +173,8 @@ int main() {
 
                     // Call check_permission function
                     check_permission(socket_desc, remote_file_path);
+                } else if (strcmp(token, "STOP") == 0) {
+                    stop_server(socket_desc);
                 } else {
                     printf("Invalid operation\n");
                     continue;
@@ -311,4 +314,9 @@ void check_permission(int socket_desc, const char *remote_file_path) {
     } else {
         printf("%s\n", server_reply);
     }
+}
+
+void stop_server(int socket_desc) {
+    send_command(socket_desc, "STOP", "", "", 0);
+    printf("Server stopped\n");
 }

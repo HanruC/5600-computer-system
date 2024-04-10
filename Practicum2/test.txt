@@ -9,6 +9,7 @@
 % rfs LS readonly.txt
 % rfs LS remote.txt 
 % rfs RM readonly.txt 
+% rfs STOP
 
 gcc s.c -o s -pthread
 gcc c.c -o c -pthread

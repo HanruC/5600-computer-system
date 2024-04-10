@@ -91,7 +91,8 @@ int main(void) {
         // Create a new thread for handling the client
         if (pthread_create(&thread_id, NULL, handle_client, (void *)&client_sock) < 0) {
             printf("Could not create thread\n");
-            return -1;
+            close(socket_desc);
+            break;
         }
     }
 
@@ -139,6 +140,10 @@ void *handle_client(void *arg) {
         remove_file(client_sock, local_file_path);
     } else if (strcmp(command, "LS") == 0) {
         check_file_permission(client_sock, local_file_path);
+    } else if (strcmp(command, "STOP") == 0){
+        printf("Received STOP command. Closing connection.\n");
+        close(client_sock);
+        exit(0);
     } else {
         printf("Invalid command: %s\n", command);
     }
