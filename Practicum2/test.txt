@@ -1,9 +1,14 @@
 % rfs WRITE local.txt remote-file.txt
 % rfs WRITE local2.txt remote-file.txt
 % rfs WRITE local3.txt remote-file.txt
+% rfs WRITE local4.txt remote2.txt 
+% rfs GET remote2.txt local.txt
 % rfs RM remote-file.txt
+% rfs WRITE local.txt readonly.txt 0444 
+% rfs WRITE local2.txt readonly.txt 
+% rfs LS readonly.txt
+% rfs LS remote.txt 
+% rfs RM readonly.txt 
 
 gcc s.c -o s -pthread
 gcc c.c -o c -pthread
-
-% rfs WRITE local.txt remote-file2.txt 0444
